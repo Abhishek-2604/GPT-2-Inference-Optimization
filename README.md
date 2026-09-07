@@ -1,6 +1,6 @@
 # LLM Inference Optimization
 
-A from-scratch study of post-training optimization techniques applied to GPT-2 (124M). Each technique is implemented independently and evaluated on three axes: **model size**, **inference latency**, and **perplexity** on WikiText-2.
+A study of post-training optimization techniques applied to GPT-2 (124M). Each technique is implemented independently and evaluated on three axes: **model size**, **inference latency**, and **perplexity** on WikiText-2.
 
 ---
 
