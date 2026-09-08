@@ -92,9 +92,3 @@ python benchmark.py --sparsity 0.5 --skip_distill
 
 ---
 
-## Key Findings
-
-- **Quantization size benefit is real** — 51% smaller with minor PPL cost, but CPU speedup requires native INT8 kernel support, not software dequantization
-- **Unstructured pruning is quality-preserving** — 30% of weights can be zeroed with only +2 PPL; the model is surprisingly robust to magnitude-based sparsity
-- **GPT-2's Conv1D is a gotcha** — standard PyTorch `quantize_dynamic` targets `nn.Linear` and silently does nothing on GPT-2; requires custom layer wrapping
-- **Distillation is the best latency play** — a 4x smaller student runs 2-3x faster with PPL recovering toward teacher given sufficient training steps
