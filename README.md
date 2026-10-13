@@ -49,11 +49,11 @@ L = α · L_hard + (1 - α) · L_soft · T²
 | Baseline (FP32)          | 474.7     | 124.4M  | 56.1 | 2885 ± 199    | —             |
 | INT8 Quantization        | 231.8     | 39.5M*  | 65.0 | 8901 ± 188    | 0.32x†        |
 | Unstructured Pruning 30% | 474.7     | 124.4M  | 58.2 | 3113 ± 318    | 0.93x†        |
-| Distilled Student (~30M) | —         | ~30M    | —    | —             | ~2-3x (est.)  |
+| Distilled Student (~30M) | —         | ~30M    | —    | —             | ~will be updated  |
 
 *Param count reflects quantized layer reporting; actual unique weights unchanged.  
 †Slower on CPU due to software dequantization overhead. Hardware INT8 kernels (TensorRT/bitsandbytes) yield 1.5–2x speedup on GPU.
-
+— will be updated 
 ---
 
 ## File Layout
