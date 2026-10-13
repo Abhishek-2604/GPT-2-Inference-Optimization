@@ -9,7 +9,7 @@ A study of post-training optimization techniques applied to GPT-2 (124M). Each t
 ### 1. Post-Training Quantization (INT8)
 Converts FP32 weights to INT8 without any retraining.
 
-GPT-2 uses `Conv1D` layers internally (not standard `nn.Linear`), so standard `quantize_dynamic` targeting `nn.Linear` silently fails. We implement a custom `QuantizedConv1D` wrapper that correctly handles GPT-2's transposed weight layout `(in, out)` vs Linear's `(out, in)`:
+GPT-2 uses `Conv1D` layers internally (not standard `nn.Linear`), so standard `quantize_dynamic` targeting `nn.Linear` doesn't work. We implement a custom `QuantizedConv1D` wrapper that correctly handles GPT-2's transposed weight layout `(in, out)` vs Linear's `(out, in)`:
 
 ```
 scale = max(|W|) / 127
@@ -20,14 +20,13 @@ W_int8 = round(W / scale).clamp(-128, 127)
 - 48 Conv1D layers quantized
 - **51% size reduction** (474.7 MB → 231.8 MB)
 - Minimal PPL degradation (56.1 → 65.0)
-- Note: runtime dequantization on CPU adds overhead vs FP32 matmuls. Real speedup requires hardware INT8 kernels (TensorRT, bitsandbytes). This is the honest tradeoff of software-only PTQ.
 
 ### 2. Unstructured Magnitude Pruning
 Zeroes out individual weights below a globally-computed magnitude threshold.
 
 - Global threshold respects layer-wise weight distributions (per-layer thresholds over-prune sensitive layers)
 - 30% of weights zeroed with only +2 PPL degradation (56.1 → 58.2)
-- No latency improvement on CPU — zeroed weights still occupy dense tensors. Speedup requires sparse kernels (e.g. NVIDIA cuSPARSE). Demonstrates weight sensitivity without hardware dependency.
+- No latency improvement on CPU - zeroed weights still occupy dense tensors. Speedup requires sparse kernels (e.g. NVIDIA cuSPARSE). Demonstrates weight sensitivity without hardware dependency.
 
 ### 3. Knowledge Distillation
 Trains a 4x smaller student (6 layers, 384 embd, ~30M params) to mimic GPT-2 teacher (12 layers, 768 embd, 124M params).
@@ -59,16 +58,12 @@ L = α · L_hard + (1 - α) · L_soft · T²
 ## File Layout
 
 ```
-llm-inference-optimization/
-├── model/
-│   └── base.py              # GPT-2 loader, latency + perplexity measurement
-├── quantization/
-│   └── ptq.py               # Custom INT8 quantization for GPT-2's Conv1D layers
-├── pruning/
-│   └── prune.py             # Global magnitude unstructured pruning
-├── distillation/
-│   └── distill.py           # Teacher-student KL distillation training loop
-├── benchmark.py             # Unified benchmark: all techniques, comparison table
+GPT-2-inference-optimization/
+├── base.py       # GPT-2 loader, latency + perplexity measurement
+├── ptq.py        # Custom INT8 quantization for GPT-2's Conv1D layers
+├── prune.py      # Global magnitude unstructured pruning
+├── distill.py    # Teacher-student KL distillation training loop
+├── benchmark.py  # Unified benchmark: all techniques, comparison table
 ├── requirements.txt
 └── README.md
 ```
